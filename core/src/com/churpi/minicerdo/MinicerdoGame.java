@@ -13,9 +13,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.churpi.minicerdo.actors.CarActor;
 import com.churpi.minicerdo.behaviors.CameraBehavior;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
+import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
 import com.churpi.minicerdo.screens.MainScreen;
+
+import javax.smartcardio.CardChannel;
 
 public class MinicerdoGame extends Game {
 
@@ -26,7 +30,6 @@ public class MinicerdoGame extends Game {
 	TweenManager tweenManager;
 
 	ShapeRenderer shapeRenderer;
-
 
 
 	public World getWorld(){
@@ -43,8 +46,8 @@ public class MinicerdoGame extends Game {
 
 	public ShapeRenderer getShapeRenderer(){ return  shapeRenderer;}
 
-	public OrthographicCamera getCamera(){
-		return camera.getOrthographicCamera();
+	public CameraBehavior getCamera(){
+		return camera;
 	}
 
 
@@ -52,6 +55,8 @@ public class MinicerdoGame extends Game {
 	public void create () {
 		world = new World(new Vector2(0,0), true);
 		tweenManager = new TweenManager();
+		Tween.registerAccessor(OrthographicCamera.class, new CameraAccessor());
+		Tween.registerAccessor(CarActor.class, new CarAccessor());
 
 		renderer = new Box2DDebugRenderer();
 
@@ -74,7 +79,7 @@ public class MinicerdoGame extends Game {
 		world.step(deltaTime, 8, 3);
 
 		tweenManager.update(deltaTime);
-		camera.update();
+		camera.update(deltaTime);
 
 		renderer.render(world, camera.getProjection());
 

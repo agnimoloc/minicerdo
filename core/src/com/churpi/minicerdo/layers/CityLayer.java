@@ -27,7 +27,7 @@ public class CityLayer extends GenericLayer {
     public CityLayer(MinicerdoGame game){
         super(game);
 
-        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 100,100);
+        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
         wayPoints2 = new Array<Vector2>(wayPoints.size);
         for(int i = 0; i < wayPoints.size; i++){
             wayPoints.get(i).set(wayPoints.get(i).x -10, wayPoints.get(i).y -10 );
@@ -43,13 +43,13 @@ public class CityLayer extends GenericLayer {
     }
 
     public void draw(){
-        game.getBatch().setProjectionMatrix(game.getCamera().combined);
+        game.getBatch().setProjectionMatrix(game.getCamera().getProjection());
         game.getBatch().begin();
         carActor.draw(game.getBatch());
         game.getBatch().end();
 
         ShapeRenderer shapeRenderer = game.getShapeRenderer();
-        shapeRenderer.setProjectionMatrix(game.getCamera().combined);
+        shapeRenderer.setProjectionMatrix(game.getCamera().getProjection());
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(0, 1, 0, 1);
