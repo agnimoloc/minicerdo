@@ -33,10 +33,10 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
     FollowPath<Vector2, LinePath.LinePathParam> steeringBehavior;
     Array<LinePath<Vector2>> paths;
 
-    float maxLinearAcceleration = 20;//= 100;
-    float maxLinearSpeed = 5;//25;
-
     Vector2 targetCamera;
+
+    float maxLinearAcceleration = 20;// 20 - 100 (*20);
+    float maxLinearSpeed = 5;// 5 - 25 (*5);
 
     int currentPath = 0;
 
@@ -47,6 +47,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
         createBox2D(game.getWorld(), position);
 
         sprite = new Sprite(new Texture("badlogic.jpg"));
+
+        targetCamera = new Vector2(body.getPosition());
         //this.setPosition(body.getPosition().x, body.getPosition().y);
         float width = 1;
         float height = 2;
@@ -54,17 +56,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
         sprite.setOrigin(width, height);
         sprite.setPosition(position.x, position.y);
 
-        targetCamera= new Vector2(position);
-
         this.boundingRadius = (width + height) / 4f;
-
-        /*game.getCamera().setFocusPoint(this);
-        game.getCamera().forceFocusPoint();*/
-        game.getCamera().setTargetPoint(position);
-        game.getCamera().forceTargetPoint();
-
-        /*Tween.set(this, CarAccessor.ACCELERATION).target(0);
-        Tween.to(this, CarAccessor.ACCELERATION, 1f).target(100).ease(TweenEquations.easeNone).start(game.getTweenManager());*/
 
     }
 
@@ -78,7 +70,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
         steeringBehavior = new FollowPath<Vector2, LinePath.LinePathParam>(this, paths.get(currentPath), 3f)
                 .setDecelerationRadius(10)
                 .setArrivalTolerance(1f)
-                .setTimeToTarget(0.1f);
+                .setTimeToTarget(0.01f);
 
     }
 
@@ -96,7 +88,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
                 currentPath = 0;
             }
             steeringBehavior.setPath(paths.get(currentPath));
-            game.getTweenManager().killTarget(this);
+            //game.getTweenManager().killTarget(this);
 
             /*if(body.getLinearVelocity().isZero()){
 
@@ -113,24 +105,25 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
 
         if(steeringBehavior != null){
+            steeringBehavior.setPredictionTime(.5f);
             steeringBehavior.calculateSteering(steeringOutput);
+            targetCamera.set(steeringBehavior.getInternalTargetPosition());
 
+            steeringBehavior.setPredictionTime(0f);
+            steeringBehavior.calculateSteering(steeringOutput);
             applySteering(steeringOutput, delta);
 
 
+
         }
+
+
+
 
         sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
         sprite.setPosition(body.getPosition().x - (sprite.getWidth() / 2), body.getPosition().y - (sprite.getHeight() / 2));
+        //sprite.setPosition(body.getPosition().x, body.getPosition().y);
 
-        targetCamera.set(body.getPosition());
-
-        if(steeringBehavior != null){
-
-            targetCamera.set(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y);
-            targetCamera.mulAdd(steeringOutput.linear.scl(5f), delta);
-        }
-        game.getCamera().setTargetPoint(targetCamera);
     }
 
 
@@ -140,13 +133,13 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
         linearVelocity.mulAdd(steering.linear, time).limit(getMaxLinearSpeed());
         body.setLinearVelocity(linearVelocity);
 
-        float angle =  body.getLinearVelocity().angle() - 90;
+        float angle =  (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
 
-        if(steering.linear.isZero()){
+        /*if(steering.linear.isZero()){
             angle = body.getAngle() * MathUtils.radiansToDegrees;
-        }
+        }*/
 
-        body.setTransform(body.getPosition(), angle * MathUtils.degreesToRadians);
+        body.setTransform(body.getPosition(), angle);
 
     }
 
@@ -163,6 +156,12 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
         sprite.draw(batch);
 
+    }
+
+    public Vector2 getTargetCamera(){
+        /*Vector2 targetCamera = new Vector2(steeringBehavior.getInternalTargetPosition());
+        targetCamera.add(steeringOutput.linear.limit(10f));*/
+        return targetCamera;
     }
 
     private void createBox2D(World world, Vector2 position){

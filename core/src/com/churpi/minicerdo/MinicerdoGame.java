@@ -76,14 +76,16 @@ public class MinicerdoGame extends Game {
 	public void render () {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 		world.step(deltaTime, 8, 3);
 
+		super.render();
+
 		tweenManager.update(deltaTime);
-		camera.update(deltaTime);
 
 		renderer.render(world, camera.getProjection());
 
-		super.render();
+		camera.update(deltaTime);
 	}
 
 	@Override

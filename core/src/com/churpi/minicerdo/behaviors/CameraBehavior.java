@@ -22,7 +22,7 @@ import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
 public class CameraBehavior implements Steerable<Vector2>{
 
     OrthographicCamera camera;
-    //Steerable<Vector2> focusPoint;
+    Steerable<Vector2> focusPoint;
     Vector2 velocity;
     CameraTarget targetPoint;
 
@@ -48,10 +48,11 @@ public class CameraBehavior implements Steerable<Vector2>{
                     .setDecelerationRadius(5);
         }
 
+        camera.zoom = 1;
 
-        Tween.set(camera, CameraAccessor.ZOOM).target(1);
+        //Tween.set(camera, CameraAccessor.ZOOM).target(50);
 
-        Tween.to(camera,CameraAccessor.ZOOM, 1).target(0.5f).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+        //Tween.to(camera,CameraAccessor.ZOOM, 1).target(5f).ease(TweenEquations.easeInOutElastic).start(tweenManager);
 
         //tweenManager.killTarget(camera);
     }
@@ -59,39 +60,23 @@ public class CameraBehavior implements Steerable<Vector2>{
     public void setTargetPoint(Vector2 position){
 
         targetPoint.setPosition(position);
+        steeringBehavior.setTarget(targetPoint);
     }
 
     public void forceTargetPoint(){
         camera.position.set(targetPoint.getPosition(), camera.zoom);
     }
 
-    /*public void setFocusPoint(Steerable<Vector2> focusPoint){
-
-        if(steeringBehavior == null) {
-            steeringBehavior = new Arrive<Vector2>(this, focusPoint) //
-                    .setTimeToTarget(0.01f) //
-                    .setArrivalTolerance(0.001f) //
-                    .setDecelerationRadius(20);
-        }
-
-        this.focusPoint = focusPoint;
-        forceFocusPoint();
-    }
-
-    public void forceFocusPoint(){
-        camera.position.set(focusPoint.getPosition(), camera.zoom);
-    }*/
-
     public void update(float delta){
 
-        if(steeringBehavior != null){
-            steeringBehavior.calculateSteering(steeringOutput);
+        //steeringBehavior.setTarget(focusPoint);
+        steeringBehavior.calculateSteering(steeringOutput);
 
-            velocity.mulAdd(steeringOutput.linear, delta);
-            camera.position.add(velocity.x, velocity.y, 0);
+        velocity.mulAdd(steeringOutput.linear, delta);
+        camera.position.add(velocity.x, velocity.y, 0);
 
 
-        }
+        //camera.position.set(targetPoint.getPosition().x, targetPoint.getPosition().y, 0);
 
         camera.update();
     }

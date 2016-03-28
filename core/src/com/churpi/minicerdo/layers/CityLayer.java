@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
@@ -28,18 +29,35 @@ public class CityLayer extends GenericLayer {
         super(game);
 
         wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
+        //wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 100,100);
         wayPoints2 = new Array<Vector2>(wayPoints.size);
+        BoundingBox box = new BoundingBox();
+
         for(int i = 0; i < wayPoints.size; i++){
             wayPoints.get(i).set(wayPoints.get(i).x -10, wayPoints.get(i).y -10 );
             wayPoints2.add(new Vector2(wayPoints.get(i).x +2, wayPoints.get(i).y +2 ));
+            box.ext(wayPoints.get(i).x, wayPoints.get(i).y, 0);
         }
 
         carActor = new CarActor(game, wayPoints.first());
         carActor.setPaths(wayPoints, wayPoints2);
+
+        //game.getCamera().setTargetPoint(new Vector2(box.getCenterX(), box.getCenterY()));
+        game.getCamera().setTargetPoint(carActor.getTargetCamera());
+        //game.getCamera().setTargetPoint(carActor.getPosition());
+        game.getCamera().forceTargetPoint();
     }
 
     public void act(float delta){
         carActor.act(delta);
+
+        /*if(steeringBehavior != null){
+
+            targetCamera.set(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y);
+            targetCamera.mulAdd(steeringOutput.linear.scl(5f), delta);
+        }*/
+        game.getCamera().setTargetPoint(carActor.getTargetCamera());
+        //game.getCamera().setTargetPoint(carActor.getPosition());
     }
 
     public void draw(){
