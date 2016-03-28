@@ -1,5 +1,8 @@
 package com.churpi.minicerdo.layers;
 
+import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -12,11 +15,14 @@ import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.Utils;
 import com.churpi.minicerdo.actors.CarActor;
+import com.churpi.minicerdo.messages.GameMessages;
 
 /**
  * Created by agni_ on 06/09/2015.
  */
 public class CityLayer extends GenericLayer {
+
+    MessageManager messageManager;
 
     CarActor carActor;
 
@@ -28,8 +34,8 @@ public class CityLayer extends GenericLayer {
     public CityLayer(MinicerdoGame game){
         super(game);
 
-        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
-        //wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 100,100);
+        //wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
+        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 150,150);
         wayPoints2 = new Array<Vector2>(wayPoints.size);
         BoundingBox box = new BoundingBox();
 
@@ -41,23 +47,32 @@ public class CityLayer extends GenericLayer {
 
         carActor = new CarActor(game, wayPoints.first());
         carActor.setPaths(wayPoints, wayPoints2);
+        carActor.setPrincipal(true);
 
-        //game.getCamera().setTargetPoint(new Vector2(box.getCenterX(), box.getCenterY()));
         game.getCamera().setTargetPoint(carActor.getTargetCamera());
-        //game.getCamera().setTargetPoint(carActor.getPosition());
+        //game.getCamera().setTargetPoint(new Vector2(box.getCenterX(),box.getCenterY()));
         game.getCamera().forceTargetPoint();
+
+        initMessageManager();
+
+    }
+
+    private void initMessageManager(){
+
+        messageManager = MessageManager.getInstance();
+
+        messageManager.addListener(carActor, GameMessages.SPEED_UP);
+        messageManager.addListener(carActor, GameMessages.SPEED_DOWN);
+        messageManager.addListener(carActor, GameMessages.CHANGE_LEFT);
+        messageManager.addListener(carActor, GameMessages.CHANGE_RIGHT);
+
     }
 
     public void act(float delta){
         carActor.act(delta);
 
-        /*if(steeringBehavior != null){
-
-            targetCamera.set(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y);
-            targetCamera.mulAdd(steeringOutput.linear.scl(5f), delta);
-        }*/
-        game.getCamera().setTargetPoint(carActor.getTargetCamera());
-        //game.getCamera().setTargetPoint(carActor.getPosition());
+        //game.getCamera().setTargetPoint(carActor.getTargetCamera());
+        game.getCamera().setTargetPoint(carActor.getPosition());
     }
 
     public void draw(){
@@ -127,4 +142,5 @@ public class CityLayer extends GenericLayer {
         // Now transform the object's vertices
         return vector.mul(tmpMatrix3);
     }
+
 }

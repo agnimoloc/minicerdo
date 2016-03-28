@@ -3,6 +3,9 @@ package com.churpi.minicerdo.behaviors;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenEquations;
 import aurelienribon.tweenengine.TweenManager;
+import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.Arrive;
@@ -15,18 +18,25 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.churpi.minicerdo.actors.CameraTarget;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
+import com.churpi.minicerdo.messages.GameMessages;
 
 /**
  * Created by agni_ on 09/09/2015.
  */
-public class CameraBehavior implements Steerable<Vector2>{
+public class CameraBehavior implements Steerable<Vector2>, Telegraph{
 
     OrthographicCamera camera;
     Steerable<Vector2> focusPoint;
     Vector2 velocity;
     CameraTarget targetPoint;
+    TweenManager tweenManager;
 
     Arrive<Vector2> steeringBehavior = null;
+
+    int zoomTarget = 1;
+
+    static final float[] ZOOM_LEVELS = { 0.5f, 0.55f, 0.6f, 0.65f, 0.7f, 0.75f };
+
     private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
 
 
@@ -48,13 +58,13 @@ public class CameraBehavior implements Steerable<Vector2>{
                     .setDecelerationRadius(5);
         }
 
-        camera.zoom = 1;
+        Tween.set(camera, CameraAccessor.ZOOM).target(1);
+        Tween.to(camera,CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+        this.tweenManager = tweenManager;
 
-        //Tween.set(camera, CameraAccessor.ZOOM).target(50);
+        MessageManager.getInstance().addListener(this, GameMessages.SPEED_UP);
+        MessageManager.getInstance().addListener(this, GameMessages.SPEED_DOWN);
 
-        //Tween.to(camera,CameraAccessor.ZOOM, 1).target(5f).ease(TweenEquations.easeInOutElastic).start(tweenManager);
-
-        //tweenManager.killTarget(camera);
     }
 
     public void setTargetPoint(Vector2 position){
@@ -173,5 +183,26 @@ public class CameraBehavior implements Steerable<Vector2>{
     @Override
     public void setMaxAngularAcceleration(float maxAngularAcceleration) {
 
+    }
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+        switch (msg.message){
+            case GameMessages.SPEED_DOWN:
+                if(zoomTarget > 0) {
+                    zoomTarget--;
+                    tweenManager.killTarget(camera);
+                    Tween.to(camera, CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+                }
+                break;
+            case GameMessages.SPEED_UP:
+                if(zoomTarget < ZOOM_LEVELS.length - 1) {
+                    zoomTarget ++;
+                    tweenManager.killTarget(camera);
+                    Tween.to(camera, CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+                }
+                break;
+        }
+        return false;
     }
 }

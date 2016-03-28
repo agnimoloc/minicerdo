@@ -4,6 +4,8 @@ import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenEquation;
 import aurelienribon.tweenengine.TweenEquations;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.SteeringBehavior;
@@ -20,11 +22,12 @@ import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.Utils;
 import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
+import com.churpi.minicerdo.messages.GameMessages;
 
 /**
  * Created by agni_ on 06/09/2015.
  */
-public class CarActor extends GenericActor implements Steerable<Vector2> {
+public class CarActor extends GenericActor implements Steerable<Vector2>, Telegraph {
 
 
     Sprite sprite;
@@ -35,10 +38,13 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
     Vector2 targetCamera;
 
-    float maxLinearAcceleration = 20;// 20 - 100 (*20);
-    float maxLinearSpeed = 5;// 5 - 25 (*5);
+    float[] maxLinearAcceleration = { 0, 5, 10, 20, 25 , 30 };// 20 - 100 (*20);
+    float[] maxLinearSpeed = { 0, 2, 4, 6, 8, 10};// 5 - 25 (*5);
+    int currentSpeed = 1;
 
     int currentPath = 0;
+
+    boolean isPrincipal = false;
 
     private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
 
@@ -48,8 +54,6 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
         sprite = new Sprite(new Texture("badlogic.jpg"));
 
-        targetCamera = new Vector2(body.getPosition());
-        //this.setPosition(body.getPosition().x, body.getPosition().y);
         float width = 1;
         float height = 2;
         sprite.setSize(width * 2, height * 2);
@@ -68,101 +72,62 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
         }
 
         steeringBehavior = new FollowPath<Vector2, LinePath.LinePathParam>(this, paths.get(currentPath), 3f)
-                .setDecelerationRadius(10)
+                .setDecelerationRadius(5)
                 .setArrivalTolerance(1f)
-                .setTimeToTarget(0.01f);
+                .setTimeToTarget(1f);
 
     }
 
-    float elapsedTime;
-
     public void act(float delta) {
 
-        elapsedTime += delta;
-        if(elapsedTime > 10f){
-            Gdx.app.log("test", "yeii");
-            elapsedTime = 0;
-
-            currentPath ++;
-            if(currentPath > paths.size -1 ){
-                currentPath = 0;
-            }
-            steeringBehavior.setPath(paths.get(currentPath));
-            //game.getTweenManager().killTarget(this);
-
-            /*if(body.getLinearVelocity().isZero()){
-
-                Tween.set(this, CarAccessor.SPEED).target(25);
-                Tween.to(this, CarAccessor.ACCELERATION, 5f).target(100).ease(TweenEquations.easeNone).start(game.getTweenManager());
-            }else {
-                Tween.to(this, CarAccessor.SPEED, 5f).target(0).ease(TweenEquations.easeNone).start(game.getTweenManager());
-                Tween.set(this, CarAccessor.ACCELERATION).target(0);
-            }*/
-
-
-        }
-
-
-
         if(steeringBehavior != null){
-            steeringBehavior.setPredictionTime(.5f);
-            steeringBehavior.calculateSteering(steeringOutput);
-            targetCamera.set(steeringBehavior.getInternalTargetPosition());
+            if(isPrincipal) {
+                steeringBehavior.setPredictionTime(.5f);
+                steeringBehavior.calculateSteering(steeringOutput);
+                targetCamera.set(steeringBehavior.getInternalTargetPosition());
+            }
 
             steeringBehavior.setPredictionTime(0f);
             steeringBehavior.calculateSteering(steeringOutput);
             applySteering(steeringOutput, delta);
 
-
-
         }
-
-
-
 
         sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
         sprite.setPosition(body.getPosition().x - (sprite.getWidth() / 2), body.getPosition().y - (sprite.getHeight() / 2));
-        //sprite.setPosition(body.getPosition().x, body.getPosition().y);
 
     }
 
 
     private void applySteering (SteeringAcceleration<Vector2> steering, float time) {
 
+
         Vector2 linearVelocity = body.getLinearVelocity();
+
         linearVelocity.mulAdd(steering.linear, time).limit(getMaxLinearSpeed());
         body.setLinearVelocity(linearVelocity);
 
-        float angle =  (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
-
-        /*if(steering.linear.isZero()){
-            angle = body.getAngle() * MathUtils.radiansToDegrees;
-        }*/
-
-        body.setTransform(body.getPosition(), angle);
+        if(linearVelocity.dst(Vector2.Zero) != 0) {
+            float angle = (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
+            body.setTransform(body.getPosition(), angle);
+        }
 
     }
 
     public void draw(SpriteBatch batch) {
-
-
-        /*ShapeRenderer shapeRenderer = game.getShapeRenderer();
+        ShapeRenderer shapeRenderer = game.getShapeRenderer();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(1, 1, 0, 1);
         shapeRenderer.circle(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y, Utils.pixelsToMeters(5f));
         shapeRenderer.setColor(0, 0, 1, 1);
-        shapeRenderer.circle(targetCamera.x, targetCamera.y, Utils.pixelsToMeters(5f));
-        shapeRenderer.end();*/
+        //shapeRenderer.circle(targetCamera.x, targetCamera.y, Utils.pixelsToMeters(5f));
+        shapeRenderer.end();
 
         sprite.draw(batch);
 
     }
 
-    public Vector2 getTargetCamera(){
-        /*Vector2 targetCamera = new Vector2(steeringBehavior.getInternalTargetPosition());
-        targetCamera.add(steeringOutput.linear.limit(10f));*/
-        return targetCamera;
-    }
+    public Vector2 getTargetCamera(){ return targetCamera; }
 
     private void createBox2D(World world, Vector2 position){
         PolygonShape shape = new PolygonShape();
@@ -236,22 +201,21 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
     @Override
     public float getMaxLinearSpeed() {
-        return maxLinearSpeed;
+        return maxLinearSpeed[currentSpeed];
     } //26 m/s = 93.6 km/h
 
     @Override
     public void setMaxLinearSpeed(float maxLinearSpeed) {
-        this.maxLinearSpeed = maxLinearSpeed;
+
     }
 
     @Override
     public float getMaxLinearAcceleration() {
-        return maxLinearAcceleration;
+        return maxLinearAcceleration[currentSpeed];
     }
 
     @Override
     public void setMaxLinearAcceleration(float maxLinearAcceleration) {
-        this.maxLinearAcceleration = maxLinearAcceleration;
     }
 
     @Override
@@ -274,5 +238,49 @@ public class CarActor extends GenericActor implements Steerable<Vector2> {
 
     }
 
+    public boolean isPrincipal(){ return isPrincipal; }
 
+    public void setPrincipal(boolean isPrincipal){
+        if(isPrincipal && targetCamera == null){
+            targetCamera = new Vector2(steeringBehavior.getInternalTargetPosition());
+        }
+        this.isPrincipal = isPrincipal;
+    }
+
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+
+        switch (msg.message) {
+            case GameMessages.SPEED_DOWN:
+                currentSpeed--;
+                if(currentSpeed < 0){
+                    currentSpeed = 0;
+                }
+                break;
+
+            case GameMessages.SPEED_UP:
+                currentSpeed++;
+                if(currentSpeed == maxLinearSpeed.length){
+                    currentSpeed = maxLinearSpeed.length -1;
+                }
+                break;
+            case GameMessages.CHANGE_RIGHT:
+                currentPath++;
+                if (currentPath == paths.size) {
+                    currentPath = paths.size - 1;
+                }
+                steeringBehavior.setPath(paths.get(currentPath));
+                break;
+            case GameMessages.CHANGE_LEFT:
+                currentPath--;
+                if (currentPath < 0) {
+                    currentPath = 0;
+                }
+                steeringBehavior.setPath(paths.get(currentPath));
+                break;
+        }
+
+        return false;
+    }
 }
