@@ -5,7 +5,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
-import com.churpi.minicerdo.messages.GameMessages;
+import com.churpi.minicerdo.constants.GameMessages;
 
 /**
  * Created by igoraviles on 3/27/16.

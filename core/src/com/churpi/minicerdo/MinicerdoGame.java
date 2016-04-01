@@ -17,6 +17,7 @@ import com.churpi.minicerdo.actors.CarActor;
 import com.churpi.minicerdo.behaviors.CameraBehavior;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
 import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
+import com.churpi.minicerdo.constants.GameEngine;
 import com.churpi.minicerdo.screens.MainScreen;
 
 import javax.smartcardio.CardChannel;
@@ -30,6 +31,8 @@ public class MinicerdoGame extends Game {
 	TweenManager tweenManager;
 
 	ShapeRenderer shapeRenderer;
+
+	private float accumulator = 0;
 
 
 	public World getWorld(){
@@ -77,7 +80,13 @@ public class MinicerdoGame extends Game {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		world.step(deltaTime, 8, 3);
+
+		float frameTime = Math.min(deltaTime, 0.25f);
+		accumulator += frameTime;
+		while (accumulator >= GameEngine.TIME_STEP) {
+			world.step(GameEngine.TIME_STEP, GameEngine.VELOCITY_ITERATIONS, GameEngine.POSITION_ITERATIONS);
+			accumulator -= GameEngine.TIME_STEP;
+		}
 
 		super.render();
 

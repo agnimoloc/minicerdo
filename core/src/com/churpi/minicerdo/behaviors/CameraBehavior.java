@@ -9,16 +9,12 @@ import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.Arrive;
-import com.badlogic.gdx.ai.steer.behaviors.BlendedSteering;
-import com.badlogic.gdx.ai.steer.behaviors.LookWhereYouAreGoing;
-import com.badlogic.gdx.ai.steer.limiters.NullLimiter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.churpi.minicerdo.actors.CameraTarget;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
-import com.churpi.minicerdo.messages.GameMessages;
+import com.churpi.minicerdo.constants.GameMessages;
 
 /**
  * Created by agni_ on 09/09/2015.
@@ -34,6 +30,7 @@ public class CameraBehavior implements Steerable<Vector2>, Telegraph{
     Arrive<Vector2> steeringBehavior = null;
 
     int zoomTarget = 1;
+
 
     static final float[] ZOOM_LEVELS = { 0.5f, 0.55f, 0.6f, 0.65f, 0.7f, 0.75f };
 

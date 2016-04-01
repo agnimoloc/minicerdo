@@ -1,14 +1,10 @@
 package com.churpi.minicerdo.actors;
 
-import aurelienribon.tweenengine.Tween;
-import aurelienribon.tweenengine.TweenEquation;
-import aurelienribon.tweenengine.TweenEquations;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
-import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,8 +17,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.Utils;
-import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
-import com.churpi.minicerdo.messages.GameMessages;
+import com.churpi.minicerdo.constants.GameMessages;
 
 /**
  * Created by agni_ on 06/09/2015.
@@ -38,8 +33,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
     Vector2 targetCamera;
 
-    float[] maxLinearAcceleration = { 0, 5, 10, 20, 25 , 30 };// 20 - 100 (*20);
-    float[] maxLinearSpeed = { 0, 2, 4, 6, 8, 10};// 5 - 25 (*5);
+    float[] maxLinearAcceleration = { 0, 100, 300, 500 };// 20 - 100 (*20);
+    float[] maxLinearSpeed = { 0, 5, 10, 30 };// 5 - 25 (*5);
     int currentSpeed = 1;
 
     int currentPath = 0;
@@ -73,21 +68,22 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
         steeringBehavior = new FollowPath<Vector2, LinePath.LinePathParam>(this, paths.get(currentPath), 3f)
                 .setDecelerationRadius(5)
-                .setArrivalTolerance(1f)
-                .setTimeToTarget(1f);
+                .setArrivalTolerance(0.01f)
+                .setTimeToTarget(0.01f)
+                .setPredictionTime(0.001f);
 
     }
 
     public void act(float delta) {
 
         if(steeringBehavior != null){
-            if(isPrincipal) {
+            /*if(isPrincipal) {
                 steeringBehavior.setPredictionTime(.5f);
                 steeringBehavior.calculateSteering(steeringOutput);
                 targetCamera.set(steeringBehavior.getInternalTargetPosition());
-            }
+            }*/
 
-            steeringBehavior.setPredictionTime(0f);
+            steeringBehavior.setPredictionTime(0.001f);
             steeringBehavior.calculateSteering(steeringOutput);
             applySteering(steeringOutput, delta);
 
@@ -102,14 +98,39 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
     private void applySteering (SteeringAcceleration<Vector2> steering, float time) {
 
 
-        Vector2 linearVelocity = body.getLinearVelocity();
+/*            Vector2 linearVelocity = body.getLinearVelocity();
+            linearVelocity.mulAdd(steering.linear, time).limit(getMaxLinearSpeed());
 
-        linearVelocity.mulAdd(steering.linear, time).limit(getMaxLinearSpeed());
-        body.setLinearVelocity(linearVelocity);
+            body.setLinearVelocity(linearVelocity);
 
-        if(linearVelocity.dst(Vector2.Zero) != 0) {
-            float angle = (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
-            body.setTransform(body.getPosition(), angle);
+            if (linearVelocity.dst(Vector2.Zero) != 0) {
+                float angle = (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
+                body.setTransform(body.getPosition(), angle);
+            }
+*/
+        boolean applyAccelerations = false;
+        if(!steering.linear.isZero()) {
+            body.applyLinearImpulse(steering.linear.scl(time), body.getPosition(), true);
+            body.applyAngularImpulse(steering.angular, true);
+
+            applyAccelerations = true;
+        }
+
+        /*boolean applyAccelerations = false;
+        if(!steering.linear.isZero()){
+            Vector2 force = steering.linear;
+            body.applyForceToCenter(force, true);
+            body.applyAngularImpulse(steering.angular, true);
+            applyAccelerations = true;
+        }*/
+
+        if(applyAccelerations){
+            Vector2 velocity = body.getLinearVelocity();
+            if (!velocity.isZero()) {
+                float angle = (body.getLinearVelocity().angle() - 90) * MathUtils.degreesToRadians;
+                body.setTransform(body.getPosition(), angle);
+
+            }
         }
 
     }
@@ -121,6 +142,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
         shapeRenderer.circle(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y, Utils.pixelsToMeters(5f));
         shapeRenderer.setColor(0, 0, 1, 1);
         //shapeRenderer.circle(targetCamera.x, targetCamera.y, Utils.pixelsToMeters(5f));
+        //shapeRenderer.circle(body.getPosition().x, body.getPosition().y, getBoundingRadius());
         shapeRenderer.end();
 
         sprite.draw(batch);
@@ -136,6 +158,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position);
+        bodyDef.linearDamping = 4;
+        bodyDef.angularDamping = 20;
 
         body = world.createBody(bodyDef);
 
@@ -260,6 +284,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
                 break;
 
             case GameMessages.SPEED_UP:
+                //body.applyLinearImpulse(new Vector2(100,100), body.getWorldCenter(), true);
                 currentSpeed++;
                 if(currentSpeed == maxLinearSpeed.length){
                     currentSpeed = maxLinearSpeed.length -1;

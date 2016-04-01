@@ -1,4 +1,4 @@
-package com.churpi.minicerdo.messages;
+package com.churpi.minicerdo.constants;
 
 /**
  * Created by igoraviles on 3/27/16.
