@@ -1,6 +1,9 @@
 package com.churpi.minicerdo.layers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
@@ -10,12 +13,12 @@ import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.Utils;
 import com.churpi.minicerdo.actors.CarActor;
-import com.churpi.minicerdo.constants.GameMessages;
+import com.churpi.minicerdo.constants.TypeMessages;
 
 /**
  * Created by agni_ on 06/09/2015.
  */
-public class CityLayer extends GenericLayer {
+public class CityLayer extends GenericLayer implements Telegraph {
 
     MessageManager messageManager;
 
@@ -29,8 +32,8 @@ public class CityLayer extends GenericLayer {
     public CityLayer(MinicerdoGame game){
         super(game);
 
-        //wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
-        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 150,150);
+        wayPoints = createRandomPath(MathUtils.random(8, 15), 0, 0, 500,500);
+        //wayPoints = createRandomPath(MathUtils.random(50, 150), 0, 0, 1000,1000);
         wayPoints2 = new Array<Vector2>(wayPoints.size);
         BoundingBox box = new BoundingBox();
 
@@ -50,24 +53,33 @@ public class CityLayer extends GenericLayer {
 
         initMessageManager();
 
+        loadMap();
+
     }
 
     private void initMessageManager(){
 
         messageManager = MessageManager.getInstance();
 
-        messageManager.addListener(carActor, GameMessages.SPEED_UP);
-        messageManager.addListener(carActor, GameMessages.SPEED_DOWN);
-        messageManager.addListener(carActor, GameMessages.CHANGE_LEFT);
-        messageManager.addListener(carActor, GameMessages.CHANGE_RIGHT);
+        messageManager.addListener(carActor, TypeMessages.GAME_SPEED_UP);
+        messageManager.addListener(carActor, TypeMessages.GAME_SPEED_DOWN);
+        messageManager.addListener(carActor, TypeMessages.GAME_CHANGE_LEFT);
+        messageManager.addListener(carActor, TypeMessages.GAME_CHANGE_RIGHT);
 
+        messageManager.addListener(this, TypeMessages.ASS_FINISH);
+        messageManager.addListener(this, TypeMessages.ASS_PROGRESS);
+
+    }
+
+    private void loadMap(){
+        messageManager.dispatchMessage(this, TypeMessages.ASS_LOAD_MAP, "Test");
     }
 
     public void act(float delta){
         carActor.act(delta);
 
-        //game.getCamera().setTargetPoint(carActor.getTargetCamera());
-        game.getCamera().setTargetPoint(carActor.getPosition());
+        game.getCamera().setTargetPoint(carActor.getTargetCamera());
+        //game.getCamera().setTargetPoint(carActor.getPosition());
     }
 
     public void draw(){
@@ -138,4 +150,16 @@ public class CityLayer extends GenericLayer {
         return vector.mul(tmpMatrix3);
     }
 
+    @Override
+    public boolean handleMessage(Telegram msg) {
+        switch (msg.message){
+            case TypeMessages.ASS_FINISH:
+                Gdx.app.log("Debug", "Finish");
+                return true;
+            case TypeMessages.ASS_PROGRESS:
+                Gdx.app.log("Debug", ((Float)msg.extraInfo).toString());
+                return true;
+        }
+        return false;
+    }
 }

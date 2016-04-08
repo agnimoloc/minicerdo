@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.behaviors.InputGameProcessor;
 import com.churpi.minicerdo.layers.CityLayer;
+import com.churpi.minicerdo.layers.LoadingLayer;
 
 /**
  * Created by agni_ on 06/09/2015.
@@ -15,6 +16,7 @@ import com.churpi.minicerdo.layers.CityLayer;
 public class MainScreen extends GenericScreen{
 
     CityLayer city;
+    LoadingLayer loadingLayer;
 
     InputGameProcessor gameProcessor;
 
@@ -22,6 +24,7 @@ public class MainScreen extends GenericScreen{
         super(game);
 
         city = new CityLayer(game);
+        loadingLayer = new LoadingLayer(game);
 
         gameProcessor = new InputGameProcessor();
         Gdx.input.setInputProcessor(gameProcessor);
@@ -34,8 +37,12 @@ public class MainScreen extends GenericScreen{
 
     @Override
     public void render(float delta) {
+
         city.act(delta);
         city.draw();
+
+        loadingLayer.render(delta);
+
     }
 
     @Override

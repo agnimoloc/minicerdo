@@ -13,12 +13,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.churpi.minicerdo.actors.CarActor;
 import com.churpi.minicerdo.behaviors.CameraBehavior;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
 import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
 import com.churpi.minicerdo.constants.GameEngine;
 import com.churpi.minicerdo.screens.MainScreen;
+import com.churpi.minicerdo.workers.AssetManagerWorker;
 
 import javax.smartcardio.CardChannel;
 
@@ -28,7 +31,11 @@ public class MinicerdoGame extends Game {
 	Box2DDebugRenderer renderer;
 	SpriteBatch batch;
 	CameraBehavior camera;
+    OrthographicCamera cameraUI;
+	Viewport viewport, viewportUI;
 	TweenManager tweenManager;
+
+	AssetManagerWorker assetManager;
 
 	ShapeRenderer shapeRenderer;
 
@@ -53,9 +60,13 @@ public class MinicerdoGame extends Game {
 		return camera;
 	}
 
+    public OrthographicCamera getUICamera(){return cameraUI;}
 
 	@Override
 	public void create () {
+
+		assetManager = new AssetManagerWorker();
+
 		world = new World(new Vector2(0,0), true);
 		tweenManager = new TweenManager();
 		Tween.registerAccessor(OrthographicCamera.class, new CameraAccessor());
@@ -68,25 +79,34 @@ public class MinicerdoGame extends Game {
 		shapeRenderer = new ShapeRenderer();
 
 		OrthographicCamera orthographicCamera = new OrthographicCamera(Utils.pixelsToMeters(Gdx.graphics.getWidth()), Utils.pixelsToMeters(Gdx.graphics.getHeight()));
+		viewport = new FillViewport(100,70, orthographicCamera);
+
+        cameraUI = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        viewportUI = new FillViewport(100,70, cameraUI);
+
+        //float ratio = 1400/Gdx.graphics.getHeight() ;
+
+		//OrthographicCamera orthographicCamera = new OrthographicCamera(Utils.pixelsToMeters(Gdx.graphics.getWidth()*ratio), Utils.pixelsToMeters(Gdx.graphics.getHeight()*ratio));
 		camera = new CameraBehavior(orthographicCamera, tweenManager);
 
 		setScreen(new MainScreen(this));
 
 	}
 
+	@Override
+	public void resize (int width, int height) {
+		viewport.update(width,height);
+        viewportUI.update(width,height);
+
+        if (screen != null) screen.resize(width, height);
+	}
 
 	@Override
 	public void render () {
+		assetManager.update();
+
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-
-		float frameTime = Math.min(deltaTime, 0.25f);
-		accumulator += frameTime;
-		while (accumulator >= GameEngine.TIME_STEP) {
-			world.step(GameEngine.TIME_STEP, GameEngine.VELOCITY_ITERATIONS, GameEngine.POSITION_ITERATIONS);
-			accumulator -= GameEngine.TIME_STEP;
-		}
 
 		super.render();
 
@@ -95,7 +115,16 @@ public class MinicerdoGame extends Game {
 		renderer.render(world, camera.getProjection());
 
 		camera.update(deltaTime);
+
+		world.step(GameEngine.TIME_STEP, GameEngine.VELOCITY_ITERATIONS, GameEngine.POSITION_ITERATIONS);
+		/*float frameTime = Math.min(deltaTime, 0.25f);
+		accumulator += frameTime;
+		while (accumulator >= GameEngine.TIME_STEP) {
+			world.step(GameEngine.TIME_STEP, GameEngine.VELOCITY_ITERATIONS, GameEngine.POSITION_ITERATIONS);
+			accumulator -= GameEngine.TIME_STEP;
+		}*/
 	}
+
 
 	@Override
 	public void dispose() {

@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.churpi.minicerdo.actors.CameraTarget;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
-import com.churpi.minicerdo.constants.GameMessages;
+import com.churpi.minicerdo.constants.TypeMessages;
 
 /**
  * Created by agni_ on 09/09/2015.
@@ -32,7 +32,7 @@ public class CameraBehavior implements Steerable<Vector2>, Telegraph{
     int zoomTarget = 1;
 
 
-    static final float[] ZOOM_LEVELS = { 0.5f, 0.55f, 0.6f, 0.65f, 0.7f, 0.75f };
+    static final float[] ZOOM_LEVELS = { 0.5f, 0.7f, 1f,  1.3f };
 
     private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
 
@@ -55,12 +55,13 @@ public class CameraBehavior implements Steerable<Vector2>, Telegraph{
                     .setDecelerationRadius(5);
         }
 
-        Tween.set(camera, CameraAccessor.ZOOM).target(1);
-        Tween.to(camera,CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+        //Tween.set(camera, CameraAccessor.ZOOM).target(10f).start(tweenManager);
+        Tween.set(camera, CameraAccessor.ZOOM).target(1.7f).start(tweenManager);
+        Tween.to(camera,CameraAccessor.ZOOM, 5).delay(1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeOutBack).start(tweenManager);
         this.tweenManager = tweenManager;
 
-        MessageManager.getInstance().addListener(this, GameMessages.SPEED_UP);
-        MessageManager.getInstance().addListener(this, GameMessages.SPEED_DOWN);
+        MessageManager.getInstance().addListener(this, TypeMessages.GAME_SPEED_UP);
+        MessageManager.getInstance().addListener(this, TypeMessages.GAME_SPEED_DOWN);
 
     }
 
@@ -76,14 +77,10 @@ public class CameraBehavior implements Steerable<Vector2>, Telegraph{
 
     public void update(float delta){
 
-        //steeringBehavior.setTarget(focusPoint);
         steeringBehavior.calculateSteering(steeringOutput);
 
         velocity.mulAdd(steeringOutput.linear, delta);
         camera.position.add(velocity.x, velocity.y, 0);
-
-
-        //camera.position.set(targetPoint.getPosition().x, targetPoint.getPosition().y, 0);
 
         camera.update();
     }
@@ -185,18 +182,18 @@ public class CameraBehavior implements Steerable<Vector2>, Telegraph{
     @Override
     public boolean handleMessage(Telegram msg) {
         switch (msg.message){
-            case GameMessages.SPEED_DOWN:
+            case TypeMessages.GAME_SPEED_DOWN:
                 if(zoomTarget > 0) {
                     zoomTarget--;
                     tweenManager.killTarget(camera);
-                    Tween.to(camera, CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+                    Tween.to(camera, CameraAccessor.ZOOM, 2).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeOutBack).start(tweenManager);
                 }
                 break;
-            case GameMessages.SPEED_UP:
+            case TypeMessages.GAME_SPEED_UP:
                 if(zoomTarget < ZOOM_LEVELS.length - 1) {
                     zoomTarget ++;
                     tweenManager.killTarget(camera);
-                    Tween.to(camera, CameraAccessor.ZOOM, 1).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeInOutElastic).start(tweenManager);
+                    Tween.to(camera, CameraAccessor.ZOOM, 2).target(ZOOM_LEVELS[zoomTarget]).ease(TweenEquations.easeOutBack).start(tweenManager);
                 }
                 break;
         }

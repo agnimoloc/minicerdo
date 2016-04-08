@@ -1,6 +1,5 @@
 package com.churpi.minicerdo.actors;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.steer.Steerable;
@@ -10,14 +9,13 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.Utils;
-import com.churpi.minicerdo.constants.GameMessages;
+import com.churpi.minicerdo.constants.TypeMessages;
 
 /**
  * Created by agni_ on 06/09/2015.
@@ -33,8 +31,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
     Vector2 targetCamera;
 
-    float[] maxLinearAcceleration = { 0, 100, 300, 500 };// 20 - 100 (*20);
-    float[] maxLinearSpeed = { 0, 5, 10, 30 };// 5 - 25 (*5);
+    float[] maxLinearAcceleration = { 0, 2000, 5000, 10000 };// 20 - 100 (*20);
+    float[] maxLinearSpeed = { 0, 300, 500, 3000 };// 5 - 25 (*5);
     int currentSpeed = 1;
 
     int currentPath = 0;
@@ -49,8 +47,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
         sprite = new Sprite(new Texture("badlogic.jpg"));
 
-        float width = 1;
-        float height = 2;
+        float width = 3;
+        float height = 6;
         sprite.setSize(width * 2, height * 2);
         sprite.setOrigin(width, height);
         sprite.setPosition(position.x, position.y);
@@ -77,11 +75,11 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
     public void act(float delta) {
 
         if(steeringBehavior != null){
-            /*if(isPrincipal) {
+            if(isPrincipal) {
                 steeringBehavior.setPredictionTime(.5f);
                 steeringBehavior.calculateSteering(steeringOutput);
                 targetCamera.set(steeringBehavior.getInternalTargetPosition());
-            }*/
+            }
 
             steeringBehavior.setPredictionTime(0.001f);
             steeringBehavior.calculateSteering(steeringOutput);
@@ -136,14 +134,14 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
     }
 
     public void draw(SpriteBatch batch) {
-        ShapeRenderer shapeRenderer = game.getShapeRenderer();
+        /*ShapeRenderer shapeRenderer = game.getShapeRenderer();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(1, 1, 0, 1);
         shapeRenderer.circle(steeringBehavior.getInternalTargetPosition().x, steeringBehavior.getInternalTargetPosition().y, Utils.pixelsToMeters(5f));
         shapeRenderer.setColor(0, 0, 1, 1);
         //shapeRenderer.circle(targetCamera.x, targetCamera.y, Utils.pixelsToMeters(5f));
         //shapeRenderer.circle(body.getPosition().x, body.getPosition().y, getBoundingRadius());
-        shapeRenderer.end();
+        shapeRenderer.end();*/
 
         sprite.draw(batch);
 
@@ -153,7 +151,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
     private void createBox2D(World world, Vector2 position){
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(1,2);
+        shape.setAsBox(3,6);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -276,28 +274,28 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
     public boolean handleMessage(Telegram msg) {
 
         switch (msg.message) {
-            case GameMessages.SPEED_DOWN:
+            case TypeMessages.GAME_SPEED_DOWN:
                 currentSpeed--;
                 if(currentSpeed < 0){
                     currentSpeed = 0;
                 }
                 break;
 
-            case GameMessages.SPEED_UP:
+            case TypeMessages.GAME_SPEED_UP:
                 //body.applyLinearImpulse(new Vector2(100,100), body.getWorldCenter(), true);
                 currentSpeed++;
                 if(currentSpeed == maxLinearSpeed.length){
                     currentSpeed = maxLinearSpeed.length -1;
                 }
                 break;
-            case GameMessages.CHANGE_RIGHT:
+            case TypeMessages.GAME_CHANGE_RIGHT:
                 currentPath++;
                 if (currentPath == paths.size) {
                     currentPath = paths.size - 1;
                 }
                 steeringBehavior.setPath(paths.get(currentPath));
                 break;
-            case GameMessages.CHANGE_LEFT:
+            case TypeMessages.GAME_CHANGE_LEFT:
                 currentPath--;
                 if (currentPath < 0) {
                     currentPath = 0;
