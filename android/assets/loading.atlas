@@ -1,0 +1,48 @@
+
+loading.png
+size: 1024,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+badlogic
+  rotate: false
+  xy: 2, 9
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+loading-bar-hidden
+  rotate: false
+  xy: 544, 324
+  size: 33, 54
+  orig: 33, 54
+  offset: 0, 0
+  index: -1
+loading-bar1
+  rotate: false
+  xy: 2, 267
+  size: 501, 49
+  orig: 501, 49
+  offset: 0, 0
+  index: -1
+loading-frame
+  rotate: false
+  xy: 2, 318
+  size: 540, 60
+  orig: 540, 60
+  offset: 0, 0
+  index: -1
+loading-frame-bg
+  rotate: false
+  xy: 505, 311
+  size: 5, 5
+  orig: 5, 5
+  offset: 0, 0
+  index: -1
+screen-bg
+  rotate: false
+  xy: 2, 2
+  size: 5, 5
+  orig: 5, 5
+  offset: 0, 0
+  index: -1

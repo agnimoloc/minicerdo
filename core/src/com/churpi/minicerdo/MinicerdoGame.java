@@ -6,6 +6,7 @@ import aurelienribon.tweenengine.TweenEquations;
 import aurelienribon.tweenengine.TweenManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,8 +20,10 @@ import com.churpi.minicerdo.actors.CarActor;
 import com.churpi.minicerdo.behaviors.CameraBehavior;
 import com.churpi.minicerdo.behaviors.accessors.CameraAccessor;
 import com.churpi.minicerdo.behaviors.accessors.CarAccessor;
+import com.churpi.minicerdo.constants.AssetsLoadTypes;
 import com.churpi.minicerdo.constants.GameEngine;
 import com.churpi.minicerdo.screens.MainScreen;
+import com.churpi.minicerdo.screens.SplashScreen;
 import com.churpi.minicerdo.workers.AssetManagerWorker;
 
 import javax.smartcardio.CardChannel;
@@ -35,7 +38,7 @@ public class MinicerdoGame extends Game {
 	Viewport viewport, viewportUI;
 	TweenManager tweenManager;
 
-	AssetManagerWorker assetManager;
+	AssetManager assetManager;
 
 	ShapeRenderer shapeRenderer;
 
@@ -62,10 +65,12 @@ public class MinicerdoGame extends Game {
 
     public OrthographicCamera getUICamera(){return cameraUI;}
 
+	public AssetManager getAssetManager(){return assetManager;}
+
 	@Override
 	public void create () {
 
-		assetManager = new AssetManagerWorker();
+		assetManager = new AssetManager();
 
 		world = new World(new Vector2(0,0), true);
 		tweenManager = new TweenManager();
@@ -89,7 +94,8 @@ public class MinicerdoGame extends Game {
 		//OrthographicCamera orthographicCamera = new OrthographicCamera(Utils.pixelsToMeters(Gdx.graphics.getWidth()*ratio), Utils.pixelsToMeters(Gdx.graphics.getHeight()*ratio));
 		camera = new CameraBehavior(orthographicCamera, tweenManager);
 
-		setScreen(new MainScreen(this));
+		//setScreen(new MainScreen(this));
+		setScreen(new SplashScreen(this, AssetsLoadTypes.BASIC));
 
 	}
 
@@ -103,7 +109,6 @@ public class MinicerdoGame extends Game {
 
 	@Override
 	public void render () {
-		assetManager.update();
 
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
