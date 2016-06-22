@@ -15,7 +15,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.churpi.minicerdo.MinicerdoGame;
+import com.churpi.minicerdo.constants.AssetsLoadTypes;
 import com.churpi.minicerdo.constants.TypeMessages;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * Created by igoraviles on 4/7/16.
@@ -35,8 +37,13 @@ public class SplashScreen extends GenericScreen implements Telegraph {
     private float percent = 0;
 
     private Image loadingBar;
+    private LoadingCallback callbackLoaded;
 
-    public SplashScreen(MinicerdoGame game, int AssetLoadType) {
+    public interface LoadingCallback{
+        void assetLoaded(MinicerdoGame game);
+    }
+
+    public SplashScreen(MinicerdoGame game, int AssetLoadType, LoadingCallback CallbackLoaded, String... Params) {
         super(game);
 
         stage = new Stage(new FitViewport(400,600));
@@ -63,14 +70,31 @@ public class SplashScreen extends GenericScreen implements Telegraph {
         stage.addActor(loadingFrame);
 
 
-        initMessages();
+        //initMessages();
 
 
+        callbackLoaded = CallbackLoaded;
 
+        //loadAssets(AssetLoadType, Params);
         // Add everything to be loaded, for instance:
         // game.manager.load("data/assets1.pack", TextureAtlas.class);
         // game.manager.load("data/assets2.pack", TextureAtlas.class);
         // game.manager.load("data/assets3.pack", TextureAtlas.class);
+    }
+
+    private void loadAssets(int AssetLoadType, String... Params){
+        switch (AssetLoadType){
+            case AssetsLoadTypes.BASIC:
+
+                break;
+            case AssetsLoadTypes.MAP:
+                loadMap(Params[0]);
+                break;
+        }
+    }
+
+    private void loadMap(String mapId){
+        //Load map...
     }
 
     private void initMessages(){
@@ -87,11 +111,11 @@ public class SplashScreen extends GenericScreen implements Telegraph {
     @Override
     public void render(float delta) {
 
-        /*if (game.manager.update()) { // Load some, will return true if done loading
-            if (Gdx.input.isTouched()) { // If the screen is touched after the game is done loading, go to the main menu screen
-                game.setScreen(new MainMenuScreen(game));
-            }
-        }*/
+
+
+        if (game.getAssetManager().update()) { // Load some, will return true if done loading
+            callbackLoaded.assetLoaded(game);
+        }
 
         // Interpolate the percentage to make it more smooth
         percent += delta/2;

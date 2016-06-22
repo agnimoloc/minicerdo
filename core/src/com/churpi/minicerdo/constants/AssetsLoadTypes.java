@@ -5,4 +5,5 @@ package com.churpi.minicerdo.constants;
  */
 public class AssetsLoadTypes {
     public static final int BASIC = 0;
+    public static final int MAP = 1;
 }

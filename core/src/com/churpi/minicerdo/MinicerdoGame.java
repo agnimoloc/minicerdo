@@ -95,7 +95,11 @@ public class MinicerdoGame extends Game {
 		camera = new CameraBehavior(orthographicCamera, tweenManager);
 
 		//setScreen(new MainScreen(this));
-		setScreen(new SplashScreen(this, AssetsLoadTypes.BASIC));
+		setScreen(new SplashScreen(this, AssetsLoadTypes.BASIC, new SplashScreen.LoadingCallback() {
+			public void assetLoaded(MinicerdoGame game) {
+				game.setScreen(new MainScreen(game));
+			}
+		} ));
 
 	}
 

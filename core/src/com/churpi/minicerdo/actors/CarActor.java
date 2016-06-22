@@ -9,6 +9,7 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -45,7 +46,7 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
         super(game);
         createBox2D(game.getWorld(), position);
 
-        sprite = new Sprite(new Texture("badlogic.jpg"));
+        sprite = ((TextureAtlas)game.getAssetManager().get("loading.atlas")).createSprite("badlogic");
 
         float width = 3;
         float height = 6;
