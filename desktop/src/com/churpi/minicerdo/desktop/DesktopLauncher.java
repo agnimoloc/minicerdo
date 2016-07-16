@@ -9,6 +9,7 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		TexturePacker.Settings settings = new TexturePacker.Settings();
 		TexturePacker.process("../../images/loading","../../android/assets","loading");
+		TexturePacker.process("../../images/skin","../../android/assets","skin");
 
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();

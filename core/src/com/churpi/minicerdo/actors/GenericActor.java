@@ -25,4 +25,6 @@ public abstract class GenericActor {
 
     abstract void draw(SpriteBatch batch);
 
+    abstract void dispose();
+
 }

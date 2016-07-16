@@ -55,6 +55,8 @@ public class CityLayer extends GenericLayer implements Telegraph {
 
         loadMap();
 
+
+
     }
 
     private void initMessageManager(){
@@ -161,5 +163,9 @@ public class CityLayer extends GenericLayer implements Telegraph {
                 return true;
         }
         return false;
+    }
+
+    public void dispose(){
+        carActor.dispose();
     }
 }

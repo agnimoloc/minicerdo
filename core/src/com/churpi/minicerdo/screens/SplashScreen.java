@@ -12,10 +12,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.churpi.minicerdo.MinicerdoGame;
 import com.churpi.minicerdo.constants.AssetsLoadTypes;
+import com.churpi.minicerdo.constants.GameEngine;
 import com.churpi.minicerdo.constants.TypeMessages;
 import jdk.nashorn.internal.codegen.CompilerConstants;
 
@@ -46,10 +48,11 @@ public class SplashScreen extends GenericScreen implements Telegraph {
     public SplashScreen(MinicerdoGame game, int AssetLoadType, LoadingCallback CallbackLoaded, String... Params) {
         super(game);
 
-        stage = new Stage(new FitViewport(400,600));
+        stage = new Stage(new FitViewport(GameEngine.VIEWPORT_UI_WIDTH, GameEngine.VIEWPORT_UI_HEIGHT));
 
         if(!game.getAssetManager().isLoaded("loading.atlas")) {
             game.getAssetManager().load("loading.atlas", TextureAtlas.class);
+            game.getAssetManager().load("skin.json", Skin.class);
             game.getAssetManager().finishLoading();
         }
         TextureAtlas atlas = game.getAssetManager().get("loading.atlas");
@@ -119,8 +122,8 @@ public class SplashScreen extends GenericScreen implements Telegraph {
 
         // Interpolate the percentage to make it more smooth
         percent += delta/2;
-        if(percent > 0.5f){
-            percent = 0.5f;
+        if(percent > 1f){
+            percent = 1f;
 
         }else{
             Gdx.app.log("percent", String.format("aaa %f", percent));
@@ -201,6 +204,7 @@ public class SplashScreen extends GenericScreen implements Telegraph {
     @Override
     public void dispose() {
         messageManager.removeListener(this, TypeMessages.ASS_PROGRESS, TypeMessages.ASS_FINISH);
+        stage.dispose();
     }
 
     @Override

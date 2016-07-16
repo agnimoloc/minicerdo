@@ -307,4 +307,8 @@ public class CarActor extends GenericActor implements Steerable<Vector2>, Telegr
 
         return false;
     }
+
+    public void dispose(){
+        game.getWorld().destroyBody(body);
+    }
 }

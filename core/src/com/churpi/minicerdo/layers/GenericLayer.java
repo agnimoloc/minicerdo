@@ -13,4 +13,6 @@ public abstract class GenericLayer {
     public GenericLayer (MinicerdoGame game){
         this.game = game;
     }
+
+    abstract void dispose();
 }

@@ -9,12 +9,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.churpi.minicerdo.actors.CarActor;
 import com.churpi.minicerdo.behaviors.CameraBehavior;
@@ -83,11 +85,12 @@ public class MinicerdoGame extends Game {
 
 		shapeRenderer = new ShapeRenderer();
 
+
 		OrthographicCamera orthographicCamera = new OrthographicCamera(Utils.pixelsToMeters(Gdx.graphics.getWidth()), Utils.pixelsToMeters(Gdx.graphics.getHeight()));
-		viewport = new FillViewport(100,70, orthographicCamera);
+		viewport = new FitViewport(GameEngine.VIEWPORT_GAME_WIDTH, GameEngine.VIEWPORT_GAME_HEIGHT, orthographicCamera);
 
         cameraUI = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        viewportUI = new FillViewport(100,70, cameraUI);
+        viewportUI = new FitViewport(GameEngine.VIEWPORT_UI_WIDTH, GameEngine.VIEWPORT_UI_HEIGHT, cameraUI);
 
         //float ratio = 1400/Gdx.graphics.getHeight() ;
 
