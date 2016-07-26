@@ -78,7 +78,7 @@ public class SplashScreen extends GenericScreen implements Telegraph {
 
         callbackLoaded = CallbackLoaded;
 
-        //loadAssets(AssetLoadType, Params);
+        loadAssets(AssetLoadType, Params);
         // Add everything to be loaded, for instance:
         // game.manager.load("data/assets1.pack", TextureAtlas.class);
         // game.manager.load("data/assets2.pack", TextureAtlas.class);
@@ -97,7 +97,7 @@ public class SplashScreen extends GenericScreen implements Telegraph {
     }
 
     private void loadMap(String mapId){
-        //Load map...
+
     }
 
     private void initMessages(){

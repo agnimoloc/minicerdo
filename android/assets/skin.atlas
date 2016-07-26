@@ -1,0 +1,14 @@
+
+skin.png
+size: 128,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+boton
+  rotate: false
+  xy: 2, 2
+  size: 100, 70
+  split: 16, 18, 15, 15
+  orig: 100, 70
+  offset: 0, 0
+  index: -1
